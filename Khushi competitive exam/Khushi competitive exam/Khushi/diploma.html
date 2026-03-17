@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diploma Student Marks Calculator</title>
+  <link rel="stylesheet" href="diploma.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>Competitive Exam - Calculation</h1>
+  </header>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="login.html">Login</a>
+    <a href="dcet.html">DCET Rank Calculator</a>
+    <a href="diploma.html" class="active">Diploma Marks Calculator</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <div class="marks-container">
+
+    <script>
+      const gradePoints = {
+        "A+": 10, "A": 9, "B+": 8, "B": 7, "C+": 6, "C": 5, "F": 0
+      };
+
+      let sgpaValues = {};
+
+      const semesters = [
+        { sem: 1, subjects: 5, appliedCredits: [4, 4, 4, 4, 2] },
+        { sem: 2, subjects: 6, appliedCredits: [4, 4, 4, 4, 4, 2] },
+        { sem: 3, subjects: 5, appliedCredits: [6, 6, 6, 6, 2] },
+        { sem: 4, subjects: 5, appliedCredits: [6, 6, 6, 6, 2] },
+        { sem: 5, subjects: 1, appliedCredits: [24] },
+        { sem: 6, subjects: 1, appliedCredits: [16] }
+      ];
+
+      semesters.forEach(({ sem, subjects, appliedCredits }) => {
+        document.write(`
+          <div class="semester-container">
+            <h3>Semester ${sem}</h3>
+            <table id="sem${sem}">
+              <thead>
+                <tr>
+                  <th>Course Code</th>
+                  <th>Applied Credits</th>
+                  <th>Grade</th>
+                  <th>Credits Earned (CE)</th>
+                  <th>Credit Points (CP = CE × GP)</th>
+                </tr>
+              </thead>
+              <tbody>
+        `);
+
+        for (let i = 0; i < subjects; i++) {
+          document.write(`
+            <tr>
+              <td>Course ${i + 1}</td>
+              <td class="applied-credits">${appliedCredits[i]}</td>
+              <td>
+                <select class="gp" onchange="updateCredits(${sem}, ${i})">
+                  <option value="select">select</option>
+                  <option value="A+">A+</option>
+                  <option value="A">A</option>
+                  <option value="B+">B+</option>
+                  <option value="B">B</option>
+                  <option value="C+">C+</option>
+                  <option value="C">C</option>
+                  <option value="F">F</option>
+                </select>
+              </td>
+              <td class="ce">0</td>
+              <td class="cp">0</td>
+            </tr>
+          `);
+        }
+
+        document.write(`</tbody></table>
+            <button onclick="calculateSGPA(${sem})">Calculate SGPA for Semester ${sem}</button>
+            <p><strong>SGPA for Sem ${sem}:</strong> <span id="sgpa${sem}">0.00</span></p>
+          </div>
+        `);
+      });
+
+      function updateCredits(sem, row) {
+        const table = document.getElementById(`sem${sem}`);
+        const selectedGrade = table.querySelectorAll(".gp")[row].value;
+        const appliedCredits = parseFloat(table.querySelectorAll(".applied-credits")[row].innerText);
+
+        const ce = appliedCredits; // always count full credits even for F
+        const gp = gradePoints[selectedGrade] || 0;
+        const cp = ce * gp;
+
+        table.querySelectorAll(".ce")[row].innerText = ce;
+        table.querySelectorAll(".cp")[row].innerText = cp;
+      }
+
+      function calculateSGPA(sem) {
+        const table = document.getElementById(`sem${sem}`);
+        let totalCredits = 0;
+        let totalCreditPoints = 0;
+
+        table.querySelectorAll("tbody tr").forEach(row => {
+          const grade = row.querySelector("select").value;
+          if (grade === "select") return;
+
+          const ce = parseFloat(row.querySelector(".applied-credits").innerText);
+          const gp = gradePoints[grade] || 0;
+          const cp = ce * gp;
+
+          row.querySelector(".ce").innerText = ce;
+          row.querySelector(".cp").innerText = cp;
+
+          totalCredits += ce;
+          totalCreditPoints += cp;
+        });
+
+        const sgpa = totalCredits === 0 ? 0 : (totalCreditPoints / totalCredits).toFixed(2);
+        sgpaValues[sem] = parseFloat(sgpa);
+        document.getElementById(`sgpa${sem}`).innerText = sgpa;
+
+        calculateFinalCGPA();
+      }
+
+      function calculateFinalCGPA() {
+  let completedSems = Object.keys(sgpaValues).length;
+  if (completedSems === 0) return;
+
+  let totalSGPA = Object.values(sgpaValues).reduce((acc, curr) => acc + curr, 0);
+  let cgpa = (totalSGPA / completedSems).toFixed(2);
+  let percentage = ((cgpa - 0.75) * 10).toFixed(2);
+
+  document.getElementById("cgpa").innerText = cgpa;
+  document.getElementById("percentage").innerText = percentage + "%";
+
+  let rank = "";
+
+  if (percentage >= 70 && percentage <= 100) {
+    rank = "First Class with Distinction (FCD)";
+  } else if (percentage >= 60 && percentage < 70) {
+    rank = "First Class (FC)";
+  } else if (percentage >= 50 && percentage < 60) {
+    rank = "Second Class (SC)";
+  } else if (percentage >= 1 && percentage < 50) {
+    rank = "Fail";
+  } else {
+    rank = "-";
+  }
+
+  document.getElementById("rank").innerText = rank;
+}
+
+      function exportToExcel() {
+        let tableData = [];
+        semesters.forEach(({ sem }) => {
+          let table = document.getElementById(`sem${sem}`);
+          let rows = table.querySelectorAll("tbody tr");
+
+          rows.forEach(row => {
+            let rowData = [
+              row.cells[0].innerText,
+              row.cells[1].innerText,
+              row.cells[2].querySelector("select").value,
+              row.cells[3].innerText,
+              row.cells[4].innerText
+            ];
+            tableData.push(rowData);
+          });
+        });
+
+        let ws = XLSX.utils.aoa_to_sheet([
+          ["Course Code", "Applied Credits", "Grade", "Credits Earned", "Credit Points"],
+          ...tableData
+        ]);
+
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Grade Sheet");
+        XLSX.writeFile(wb, "Diploma_Grade_Sheet.xlsx");
+      }
+
+      function logout() {
+        window.location.href = "index.html";
+      }
+    </script>
+
+    <div class="final-results">
+      <h3>Final Results</h3>
+      <div class="results-container">
+        <div class="result-box">CGPA: <span id="cgpa">0.00</span></div>
+        <div class="result-box">Percentage: <span id="percentage">0.00%</span></div>
+        <div class="result-box">Rank: <span id="rank">-</span></div>
+      </div>
+    </div>
+
+    <button onclick="exportToExcel()">Export to Excel</button>
+
+  </div>
+
+  <footer>© 2025 Diploma Marks Calculator. All Rights Reserved.</footer>
+
+</body>
+</html>

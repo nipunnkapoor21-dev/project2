@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DCET Rank Calculator</title>
+    <link rel="stylesheet" href="dcet.css">
+</head>
+<body>
+
+    <header>
+        <h1>Competitive Exam - Calculation</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href="dcet.html" class="active">DCET Rank Calculator</a>
+        <a href="diploma.html">Diploma Marks Calculator</a>
+        <a href="#" onclick="logout()">Logout</a>
+
+    </nav>
+
+    <main>
+        <section class="calculator-container">
+            <h2>DCET Rank Prediction</h2>
+            <p>Enter your details below to calculate your estimated rank.</p>
+
+            <div class="input-box">
+                <label for="cgpa">CGPA (Semesters 1-6 Average):</label>
+                <input type="number" id="cgpa" step="0.01" placeholder="e.g., 8.5" required>
+            </div>
+
+            <div class="input-box">
+                <label for="dcet">DCET Exam Marks (out of 100):</label>
+                <input type="number" id="dcet" placeholder="e.g., 75" required>
+            </div>
+
+            <button onclick="calculateDCET()">Calculate Rank</button>
+
+            <div id="dcetResult" class="result-box"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Competitive Exam Calculator. All rights reserved.</p>
+    </footer>
+
+    <script>
+    function calculateDCET() {
+    let cgpa = parseFloat(document.getElementById('cgpa').value);
+    let dcet = parseFloat(document.getElementById('dcet').value);
+    
+    if (isNaN(cgpa) || isNaN(dcet) || cgpa < 0 || cgpa > 10 || dcet < 0 || dcet > 100) {
+        alert('Please enter valid CGPA (0-10) and DCET Marks (0-100)');
+        return;
+    }
+
+    let cgpaPercent = (cgpa / 10) * 50;
+    let dcetPercent = (dcet / 100) * 50;
+    let finalPercent = cgpaPercent + dcetPercent;
+
+    // Improved rank estimation logic (you can customize the multiplier)
+    let estimatedRank = Math.round((100 - finalPercent) * 200); // e.g., Max rank ~10,000 for low scores
+
+    if (estimatedRank < 1) estimatedRank = 1; // Ensure rank starts from 1
+
+    document.getElementById('dcetResult').innerHTML = `
+        <h3>Result:</h3>
+        <p><strong>Final Percentage:</strong> ${finalPercent.toFixed(2)}%</p>
+        <p><strong>Estimated DCET Rank:</strong> ${estimatedRank}</p>
+    `;
+}
+
+</script>
+
+</body>
+</html>

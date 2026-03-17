@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitive Exam - Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <header>
+        <h1>Competitive Exam - Calculation</h1>
+    </header>
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href #="dcet.html">DCET Rank Calculator</a>
+        <a href #="diploma.html">Diploma Marks Calculator</a>
+        <a href="#" onclick="logout()">Logout</a>
+
+    </nav>
+
+    <main>
+        <section class="login-container">
+            <h2>Login to Calculation</h2>
+            <form id="loginForm">
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Enter your name" required>
+                
+                <label for="reg">Registration Number:</label>
+                <input type="text" id="reg" placeholder="Enter your registration number" required>
+
+                <label for="course">Course:</label>
+                <select id="course" required>
+                    <option value="" disabled selected>Select your course</option>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Science">Information Science</option>
+                    <option value="EC">Electronics & Communication</option>
+                    <option value="EEE">Electrical & Electronics</option>
+                    <option value="Civil">Civil</option>
+                    <option value="Mechanical">Mechanical</option>
+                </select>
+
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Competitive Exam Calculator. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevents default form submission
+            window.location.href = "dcet.html"; // Redirects to DCET Rank Calculator
+        });
+        
+    function logout() {
+        window.location.href = "index.html"; // Redirect to index.html
+    }
+
+
+    </script>
+
+</body>
+</html>
